@@ -58,7 +58,7 @@ function Logo() {
     </div>
   );
 }
-function NavBar({ movies }) {
+function NavBar({ children }) {
   const [query, setQuery] = useState('');
   return (
     <nav className="nav-bar">
@@ -70,17 +70,11 @@ function NavBar({ movies }) {
         value={query}
         onChange={(e) => setQuery(e.target.value)}
       />
-      <NumberResults movies={movies} />
+      {children}
     </nav>
   );
 }
-function NumberResults({ movies }) {
-  return (
-    <p className="num-results">
-      Found <strong>{movies.length}</strong> results
-    </p>
-  );
-}
+
 function MovieList({ movies }) {
   return (
     <ul className="list">
@@ -191,7 +185,11 @@ export default function App() {
   const [movies, setMovies] = useState(tempMovieData);
   return (
     <>
-      <NavBar movies={movies} />
+      <NavBar>
+        <p className="num-results">
+          Found <strong>{movies.length}</strong> results
+        </p>
+      </NavBar>
       <Main movies={movies} />
     </>
   );
