@@ -58,7 +58,7 @@ function Logo() {
     </div>
   );
 }
-function NavBar() {
+function NavBar({ movies }) {
   const [query, setQuery] = useState('');
   return (
     <nav className="nav-bar">
@@ -70,14 +70,18 @@ function NavBar() {
         value={query}
         onChange={(e) => setQuery(e.target.value)}
       />
-      <p className="num-results">
-        Found <strong>X</strong> results
-      </p>
+      <NumberResults movies={movies} />
     </nav>
   );
 }
-function MovieList() {
-  const [movies, setMovies] = useState(tempMovieData);
+function NumberResults({ movies }) {
+  return (
+    <p className="num-results">
+      Found <strong>{movies.length}</strong> results
+    </p>
+  );
+}
+function MovieList({ movies }) {
   return (
     <ul className="list">
       {movies?.map((movie) => (
@@ -123,7 +127,7 @@ function Summary({ watched }) {
     </div>
   );
 }
-function Main() {
+function Main({ movies }) {
   const [watched, setWatched] = useState(tempWatchedData);
   const [isOpen1, setIsOpen1] = useState(true);
   const [isOpen2, setIsOpen2] = useState(true);
@@ -137,7 +141,7 @@ function Main() {
         >
           {isOpen1 ? '–' : '+'}
         </button>
-        {isOpen1 && <MovieList />}
+        {isOpen1 && <MovieList movies={movies} />}
       </div>
 
       <div className="box">
@@ -184,10 +188,11 @@ function WatchedMovieList({ watched }) {
   );
 }
 export default function App() {
+  const [movies, setMovies] = useState(tempMovieData);
   return (
     <>
-      <NavBar />
-      <Main />
+      <NavBar movies={movies} />
+      <Main movies={movies} />
     </>
   );
 }
