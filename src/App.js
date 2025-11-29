@@ -124,7 +124,7 @@ function Summary({ watched }) {
 function Loader() {
   return <p className="loader">Loading...</p>;
 }
-function Main({ movies, isloading }) {
+function Main({ movies, isloading, error }) {
   const [watched, setWatched] = useState(tempWatchedData);
   const [isOpen1, setIsOpen1] = useState(true);
   const [isOpen2, setIsOpen2] = useState(true);
@@ -138,7 +138,9 @@ function Main({ movies, isloading }) {
         >
           {isOpen1 ? '–' : '+'}
         </button>
-        {isOpen1 && isloading ? <Loader /> : <MovieList movies={movies} />}
+        {isOpen1 && isloading && <Loader />}
+        {!isloading && !error && <MovieList movies={movies} />}
+        {error && <ErrorMessage message={error} />}
       </div>
 
       <div className="box">
@@ -187,20 +189,31 @@ function WatchedMovieList({ watched }) {
 export default function App() {
   const [movies, setMovies] = useState(tempMovieData);
   const [isLoading, setLoading] = useState(false);
-  const query = 'avengers';
+  const [error, setError] = useState('');
+  const query = 'ssdefg';
   useEffect(function () {
     async function fetchMovies() {
-      setLoading(true);
-      const res = await fetch(
-        `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`
-      );
-      const data = await res.json();
-      setMovies(data.Search);
-      setLoading(false);
+      try {
+        setLoading(true);
+        const res = await fetch(
+          `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`
+        );
+        if (!res.ok) throw new Error('Something went wrong fetching movies');
+        const data = await res.json();
+        if (data.Response === 'False') {
+          throw new Error('Movie not found!');
+        }
+        setMovies(data.Search);
+        setLoading(false);
+      } catch (err) {
+        console.error(err.message);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
     }
     fetchMovies();
   }, []);
-
   return (
     <>
       <NavBar>
@@ -208,7 +221,15 @@ export default function App() {
           Found <strong>{movies.length}</strong> results
         </p>
       </NavBar>
-      <Main movies={movies} isloading={isLoading} />
+      <Main movies={movies} isloading={isLoading} error={error} />
     </>
+  );
+}
+function ErrorMessage({ message }) {
+  return (
+    <p className="error">
+      <span>⛔</span>
+      {message}
+    </p>
   );
 }
