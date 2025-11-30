@@ -58,8 +58,7 @@ function Logo() {
     </div>
   );
 }
-function NavBar({ children }) {
-  const [query, setQuery] = useState('');
+function NavBar({ children, query, setQuery }) {
   return (
     <nav className="nav-bar">
       <Logo />
@@ -187,36 +186,53 @@ function WatchedMovieList({ watched }) {
   );
 }
 export default function App() {
+  const [query, setQuery] = useState('Avengers');
   const [movies, setMovies] = useState(tempMovieData);
   const [isLoading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const query = 'ssdefg';
-  useEffect(function () {
-    async function fetchMovies() {
-      try {
-        setLoading(true);
-        const res = await fetch(
-          `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`
-        );
-        if (!res.ok) throw new Error('Something went wrong fetching movies');
-        const data = await res.json();
-        if (data.Response === 'False') {
-          throw new Error('Movie not found!');
+  const tempquery = 'lion king';
+  // useEffect(function () {
+  //   console.log('A');
+  // }, []);
+  // useEffect(function () {
+  //   console.log('B');
+  // });
+  // console.log('C');
+
+  useEffect(
+    function () {
+      async function fetchMovies() {
+        try {
+          setLoading(true);
+          setError('');
+          const res = await fetch(
+            `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`
+          );
+          if (!res.ok) throw new Error('Something went wrong fetching movies');
+          const data = await res.json();
+          if (data.Response === 'False') {
+            throw new Error('Movie not found!');
+          }
+          setMovies(data.Search);
+          setLoading(false);
+        } catch (err) {
+          setError(err.message);
+        } finally {
+          setLoading(false);
         }
-        setMovies(data.Search);
-        setLoading(false);
-      } catch (err) {
-        console.error(err.message);
-        setError(err.message);
-      } finally {
-        setLoading(false);
       }
-    }
-    fetchMovies();
-  }, []);
+      if (!query.length) {
+        setMovies([]);
+        setError('');
+        return;
+      }
+      fetchMovies();
+    },
+    [query]
+  );
   return (
     <>
-      <NavBar>
+      <NavBar query={query} setQuery={setQuery}>
         <p className="num-results">
           Found <strong>{movies.length}</strong> results
         </p>
